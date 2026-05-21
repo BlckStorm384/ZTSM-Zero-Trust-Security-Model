@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard - ZTSM</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0a0f1e;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .card {
+      background: #111827;
+      border: 1px solid #1f2d40;
+      border-radius: 12px;
+      padding: 40px;
+      width: 100%;
+      max-width: 450px;
+      box-shadow: 0 0 40px rgba(0,0,0,0.5);
+      text-align: center;
+    }
+    .icon { font-size: 48px; margin-bottom: 16px; }
+    h1 { color: #fff; font-size: 24px; margin-bottom: 8px; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(55,138,221,0.1);
+      border: 1px solid rgba(55,138,221,0.2);
+      border-radius: 20px;
+      padding: 6px 14px;
+      margin: 12px auto;
+    }
+    .badge span { width: 6px; height: 6px; border-radius: 50%; background: #378ADD; display: inline-block; }
+    .badge p { color: #378ADD; font-size: 11px; letter-spacing: 1px; }
+    .info {
+      background: #1f2937;
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 24px;
+      text-align: left;
+    }
+    .info-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #374151; }
+    .info-row:last-child { border-bottom: none; }
+    .info-label { color: #6b7280; font-size: 13px; }
+    .info-value { color: #fff; font-size: 13px; }
+    .back-btn {
+      margin-top: 24px;
+      padding: 10px 24px;
+      background: #1f2937;
+      border: 1px solid #378ADD;
+      border-radius: 8px;
+      color: #378ADD;
+      cursor: pointer;
+      font-size: 13px;
+      letter-spacing: 1px;
+    }
+    .back-btn:hover { background: #378ADD; color: #fff; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">🛡️</div>
+    <h1>Admin Dashboard</h1>
+    <div class="badge">
+      <span></span>
+      <p>ADMIN ACCESS GRANTED</p>
+    </div>
+    <div class="info">
+      <div class="info-row">
+        <span class="info-label">Email</span>
+        <span class="info-value" id="email">—</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Role</span>
+        <span class="info-value" id="role">—</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">IAM Role</span>
+        <span class="info-value" id="iamRole">—</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Access Level</span>
+        <span class="info-value">Administrator</span>
+      </div>
+    </div>
+    <button class="back-btn" onclick="window.location.href='index.html'">← BACK TO LOGIN</button>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    document.getElementById('email').innerText = params.get('email') || '—';
+    document.getElementById('role').innerText = params.get('role') || '—';
+    document.getElementById('iamRole').innerText = params.get('iamRole') || '—';
+  </script>
+</body>
+</html>

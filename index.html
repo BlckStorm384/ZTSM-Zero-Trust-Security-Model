@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ZTSM - Zero Trust Security</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0a0f1e;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card {
+      background: #111827;
+      border: 1px solid #1f2d40;
+      border-radius: 12px;
+      padding: 40px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 0 40px rgba(0,0,0,0.5);
+    }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .logo h1 {
+      color: #378ADD;
+      font-size: 28px;
+      letter-spacing: 4px;
+    }
+
+    .logo p {
+      color: #4b5563;
+      font-size: 12px;
+      letter-spacing: 2px;
+      margin-top: 4px;
+    }
+
+    .badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      background: rgba(55,138,221,0.1);
+      border: 1px solid rgba(55,138,221,0.2);
+      border-radius: 20px;
+      padding: 6px 14px;
+      width: fit-content;
+      margin: 0 auto 28px;
+    }
+
+    .badge span {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #378ADD;
+      display: inline-block;
+    }
+
+    .badge p {
+      color: #378ADD;
+      font-size: 11px;
+      letter-spacing: 1px;
+    }
+
+    label {
+      color: #9ca3af;
+      font-size: 12px;
+      letter-spacing: 1px;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px 14px;
+      background: #1f2937;
+      border: 1px solid #374151;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 14px;
+      margin-bottom: 16px;
+      outline: none;
+      transition: border 0.2s;
+    }
+
+    input:focus {
+      border-color: #378ADD;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #378ADD;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: 1px;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background: #2563a8;
+    }
+
+    #mfa-section {
+      display: none;
+      margin-top: 24px;
+      padding-top: 24px;
+      border-top: 1px solid #1f2d40;
+    }
+
+    #mfa-section h3 {
+      color: #fff;
+      font-size: 16px;
+      margin-bottom: 6px;
+    }
+
+    #mfa-section p {
+      color: #6b7280;
+      font-size: 12px;
+      margin-bottom: 16px;
+    }
+
+    #response {
+      margin-top: 20px;
+      padding: 14px;
+      background: #1f2937;
+      border-radius: 8px;
+      color: #34d399;
+      font-size: 13px;
+      font-family: monospace;
+      display: none;
+      white-space: pre-wrap;
+    }
+
+    #response.error {
+      color: #f87171;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">
+      <h1>ZTSM</h1>
+      <p>ZERO TRUST SECURITY MODEL</p>
+    </div>
+
+    <div class="badge">
+      <span></span>
+      <p>IDENTITY VERIFICATION</p>
+    </div>
+
+    <label>EMAIL ADDRESS</label>
+    <input type="email" id="email" placeholder="Enter your email" />
+
+    <label>PASSWORD</label>
+    <input type="password" id="password" placeholder="Enter your password" />
+
+    <button onclick="login()">VERIFY IDENTITY</button>
+
+    <div id="mfa-section">
+      <h3>MFA Verification</h3>
+      <p>Check your terminal for the 6-digit code</p>
+      <label>MFA CODE</label>
+      <input type="text" id="mfa-code" placeholder="Enter 6-digit code" maxlength="6" />
+      <button onclick="verifyMfa()">VERIFY CODE</button>
+    </div>
+
+    <div id="dashboard-section" style="display:none; margin-top:24px; padding-top:24px; border-top:1px solid #1f2d40;">
+  <h3 style="color:#fff; font-size:16px; margin-bottom:12px;">Access Dashboard</h3>
+  <button onclick="accessDashboard('user')" style="margin-bottom:10px;">USER DASHBOARD</button>
+  <button onclick="accessDashboard('admin')" style="background:#1f2937; border:1px solid #378ADD;">ADMIN DASHBOARD</button>
+</div>
+
+    <div id="response"></div>
+  </div>
+
+  <script>
+    let userId = null;
+
+    async function login() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const res = await fetch('/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      const responseDiv = document.getElementById('response');
+      responseDiv.style.display = 'block';
+      if (data.userId) {
+        userId = data.userId;
+        responseDiv.classList.remove('error');
+        responseDiv.innerText = '✅ ' + data.message;
+        document.getElementById('mfa-section').style.display = 'block';
+      } else {
+        responseDiv.classList.add('error');
+        responseDiv.innerText = '❌ ' + data.error;
+      }
+    }
+
+    async function verifyMfa() {
+      const token = document.getElementById('mfa-code').value;
+      const res = await fetch('/auth/verify-mfa', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, token })
+      });
+      const data = await res.json();
+      const responseDiv = document.getElementById('response');
+      responseDiv.style.display = 'block';
+      if (data.user) {
+        responseDiv.classList.remove('error');
+        responseDiv.innerText = '✅ Access Granted!\n\nEmail: ' + data.user.email + '\nRole: ' + data.user.role + '\nIAM Role: ' + data.user.iamRole;
+        document.getElementById('dashboard-section').style.display = 'block';
+      } else {
+        responseDiv.classList.add('error');
+        responseDiv.innerText = '❌ ' + data.error;
+      }
+    }
+
+    async function accessDashboard(type) {
+      const res = await fetch('/dashboard/' + type, {
+        method: 'GET',
+        headers: { 'user-id': userId }
+      });
+      const data = await res.json();
+      const responseDiv = document.getElementById('response');
+      responseDiv.style.display = 'block';
+      if (data.message) {
+        responseDiv.classList.remove('error');
+        responseDiv.innerText = '✅ ' + data.message;
+        const params = new URLSearchParams({
+          email: data.email,
+          role: data.access,
+          iamRole: data.iamRole
+        });
+        window.location.href = type + '-dashboard.html?' + params.toString();
+      } else {
+        responseDiv.classList.add('error');
+        responseDiv.innerText = '❌ ' + data.error;
+      }
+    }
+  </script>
+</body>
+</html>
